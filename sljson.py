@@ -3,7 +3,7 @@ import tornado.web
 import tornado.httpclient
 import json
 
-class MainHandler(tornado.web.RequestHandler):
+class TripHandler(tornado.web.RequestHandler):
 
   @tornado.web.asynchronous
   def get(self):
@@ -55,15 +55,52 @@ class MainHandler(tornado.web.RequestHandler):
      self.write(utdata)
      self.finish()
 
-    
+class JourneyHandler(tornado.web.RequestHandler):
+
+  @tornado.web.asynchronous
+  def get(self):
+    hclient = tornado.httpclient.AsyncHTTPClient()
+    hclient.fetch("http://api.sl.se/api2/TravelplannerV2/journeydetail.json?"+self.request.uri.split("?")[1], self.searchdone)
+
+  def searchdone(self, response):
+     data = json.loads(response.body)
+     try:
+       data["JourneyDetail"]["Stops"] = data["JourneyDetail"]["Stops"]["Stop"]
+       del data["JourneyDetail"]["noNamespaceSchemaLocation"]
+     except:
+       none = 1
+     self.write(data)
+     self.finish()
+     return
+
+class GeometryHandler(tornado.web.RequestHandler):
+
+  @tornado.web.asynchronous
+  def get(self):
+    hclient = tornado.httpclient.AsyncHTTPClient()
+    hclient.fetch("http://api.sl.se/api2/TravelplannerV2/geometry.json?"+self.request.uri.split("?")[1], self.searchdone)
+
+  def searchdone(self, response):
+     data = json.loads(response.body)
+     try:
+       data["Geometry"]["Points"] = data["Geometry"]["Points"]["Point"]
+       del data["Geometry"]["noNamespaceSchemaLocation"]
+     except:
+       none = 1
+     self.write(data)
+     self.finish()
+     return
+
 application = tornado.web.Application([
-    (r"/trip.json", MainHandler),
+    (r"/trip.json", TripHandler),
+    (r"/journeydetail.json", JourneyHandler),
+    (r"/geometry.json", GeometryHandler),
 ])
 
 if __name__ == "__main__":
-    application.listen(80)
+    application.listen(8080)
     tornado.ioloop.IOLoop.instance().start()
 
 #https://api.sl.se/api2/TravelplannerV2/trip.json
-#?key=ed99953977a54a9b8ee0ea7451e9db53&Date=2014-11-21&Time=11:00&originId=5009&destId=9001&numTrips=1
+#?key=<Key>&Date=2014-11-21&Time=11:00&originId=5009&destId=9001&numTrips=1
 
