@@ -3,6 +3,7 @@ import tornado.web
 import tornado.httpclient
 import json
 
+# Wrapper for trip.json
 class TripHandler(tornado.web.RequestHandler):
 
   @tornado.web.asynchronous
@@ -55,6 +56,7 @@ class TripHandler(tornado.web.RequestHandler):
      self.write(utdata)
      self.finish()
 
+# Wrapper for journeydetail.json
 class JourneyHandler(tornado.web.RequestHandler):
 
   @tornado.web.asynchronous
@@ -73,6 +75,7 @@ class JourneyHandler(tornado.web.RequestHandler):
      self.finish()
      return
 
+# Wrapper for geometry.json
 class GeometryHandler(tornado.web.RequestHandler):
 
   @tornado.web.asynchronous
